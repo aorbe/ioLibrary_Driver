@@ -53,6 +53,8 @@
 #include "socket.h"
 #include "dhcp.h"
 
+extern void sendUart(char* t, int v);
+
 /* If you want to display debug & processing message, Define _DHCP_DEBUG_ in dhcp.h */
 
 #ifdef _DHCP_DEBUG_
@@ -710,11 +712,18 @@ uint8_t DHCP_run(void)
 
 	if(dhcp_state == STATE_DHCP_STOP) return DHCP_STOPPED;
 
-	if(getSn_SR(DHCP_SOCKET) != SOCK_UDP)
+	if(getSn_SR(DHCP_SOCKET) != SOCK_UDP) {
+		sendUart("Fase A ", 1);
 	   socket(DHCP_SOCKET, Sn_MR_UDP, DHCP_CLIENT_PORT, 0x00);
+	}
+	sendUart("Fase A ", 2);
 
 	ret = DHCP_RUNNING;
 	type = parseDHCPMSG();
+	sendUart("Fase A ", 3);
+
+
+	sendUart("DHCP_STATE ", dhcp_state);
 
 	switch ( dhcp_state ) {
 	   case STATE_DHCP_INIT     :
@@ -727,9 +736,6 @@ uint8_t DHCP_run(void)
    		break;
 		case STATE_DHCP_DISCOVER :
 			if (type == DHCP_OFFER){
-#ifdef _DHCP_DEBUG_
-				printf("> Receive DHCP_OFFER\r\n");
-#endif
             DHCP_allocated_ip[0] = pDHCPMSG->yiaddr[0];
             DHCP_allocated_ip[1] = pDHCPMSG->yiaddr[1];
             DHCP_allocated_ip[2] = pDHCPMSG->yiaddr[2];

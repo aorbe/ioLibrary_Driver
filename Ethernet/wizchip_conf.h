@@ -71,9 +71,7 @@ extern "C" {
 #define W5300						5300
 #define W5500						5500
 
-#ifndef _WIZCHIP_
-#define _WIZCHIP_                      W5300   // W5100, W5100S, W5200, W5300, W5500
-#endif
+#define _WIZCHIP_                      W5500   // W5100, W5100S, W5200, W5300, W5500
 
 #define _WIZCHIP_IO_MODE_NONE_         0x0000
 #define _WIZCHIP_IO_MODE_BUS_          0x0100 /**< Bus interface mode */

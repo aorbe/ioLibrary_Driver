@@ -419,33 +419,17 @@ void wizchip_sw_reset(void)
 int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 {
    int8_t i;
-#if _WIZCHIP_ < W5200
-   int8_t j;
-#endif
    int8_t tmp = 0;
    wizchip_sw_reset();
    if(txsize)
    {
       tmp = 0;
    //M20150601 : For integrating with W5300
-   #if _WIZCHIP_ == W5300
-		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-		{
-			if(txsize[i] >= 64) return -1;   //No use 64KB even if W5300 support max 64KB memory allocation
-			tmp += txsize[i];
-			if(tmp > 128) return -1;
-		}
-		if(tmp % 8) return -1;
-   #else
-		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
-		{
-			tmp += txsize[i];
 
-		#if _WIZCHIP_ < W5200	//2016.10.28 peter add condition for w5100 and w5100s
-			if(tmp > 8) return -1;
-		#else
+		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
+		{
+			tmp += txsize[i];
 			if(tmp > 16) return -1;
-		#endif
 		}
 		for(i = 0 ; i < _WIZCHIP_SOCK_NUM_; i++)
 		{
@@ -458,7 +442,6 @@ int8_t wizchip_init(uint8_t* txsize, uint8_t* rxsize)
 		#endif
 		}
 
-	#endif
    }
 
    if(rxsize)
@@ -617,19 +600,8 @@ intr_kind wizchip_getinterruptmask(void)
 int8_t wizphy_getphylink(void)
 {
    int8_t tmp = PHY_LINK_OFF;
-#if _WIZCHIP_ == W5100S
-   if(getPHYSR() & PHYSR_LNK)
-	   tmp = PHY_LINK_ON;
-#elif   _WIZCHIP_ == W5200
-   if(getPHYSTATUS() & PHYSTATUS_LINK)
-      tmp = PHY_LINK_ON;
-#elif _WIZCHIP_ == W5500
    if(getPHYCFGR() & PHYCFGR_LNK_ON)
       tmp = PHY_LINK_ON;
-
-#else
-   tmp = -1;
-#endif
    return tmp;
 }
 
@@ -782,6 +754,7 @@ void wizphy_getphyconf(wiz_PhyConf* phyconf)
 {
    uint8_t tmp = 0;
    tmp = getPHYCFGR();
+
    phyconf->by   = (tmp & PHYCFGR_OPMD) ? PHY_CONFBY_SW : PHY_CONFBY_HW;
    switch(tmp & PHYCFGR_OPMDC_ALLA)
    {

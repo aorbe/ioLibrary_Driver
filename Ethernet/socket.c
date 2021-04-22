@@ -65,6 +65,7 @@ static uint16_t sock_is_sending = 0;
 
 static uint16_t sock_remained_size[_WIZCHIP_SOCK_NUM_] = {0,0,};
 
+
 //M20150601 : For extern decleation
 //static uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
 uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
@@ -247,8 +248,8 @@ int8_t listen(uint8_t sn)
 	while(getSn_CR(sn));
    while(getSn_SR(sn) != SOCK_LISTEN)
    {
-         close(sn);
-         return SOCKERR_SOCKCLOSED;
+      close(sn);
+      return SOCKERR_SOCKCLOSED;
    }
    return SOCK_OK;
 }
