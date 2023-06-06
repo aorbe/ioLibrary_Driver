@@ -61,6 +61,9 @@
 #define _W5500_SPI_FDM_OP_LEN4_     0x03
 
 
+#define SS_RESET GPIOC->BSRRL = GPIO_Pin_5;
+#define SS_SET GPIOC->BSRRH = GPIO_Pin_5;
+
 #if   (_WIZCHIP_ == 5500)
 ////////////////////////////////////////////////////
 
@@ -72,7 +75,7 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
 
 
    WIZCHIP_CRITICAL_ENTER();
-   GPIOA->BSRRH = GPIO_Pin_15;
+   SS_SET
 
    AddrSel |= (_W5500_SPI_READ_ | _W5500_SPI_VDM_OP_);
 
@@ -90,7 +93,7 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
    } 
 
    while (SPI1->SR & SPI_I2S_FLAG_BSY);
-   GPIOA->BSRRL = GPIO_Pin_15;
+   SS_RESET
    WIZCHIP_CRITICAL_EXIT();
    
 
@@ -102,7 +105,8 @@ void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
    uint8_t spi_data[4];
 
    WIZCHIP_CRITICAL_ENTER();
-   GPIOA->BSRRH = GPIO_Pin_15;
+   SS_SET
+
 
    AddrSel |= (_W5500_SPI_WRITE_ | _W5500_SPI_VDM_OP_);
 
@@ -117,7 +121,7 @@ void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
    } 
 
    while (SPI1->SR & SPI_I2S_FLAG_BSY);
-   GPIOA->BSRRL = GPIO_Pin_15;
+   SS_RESET
    WIZCHIP_CRITICAL_EXIT();
 }
          
@@ -127,7 +131,8 @@ void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    uint16_t i;
 
    WIZCHIP_CRITICAL_ENTER();
-   GPIOA->BSRRH = GPIO_Pin_15;
+   SS_SET
+
 
 
    AddrSel |= (_W5500_SPI_READ_ | _W5500_SPI_VDM_OP_);
@@ -152,7 +157,7 @@ void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    }
 
    while (SPI1->SR & SPI_I2S_FLAG_BSY);
-   GPIOA->BSRRL = GPIO_Pin_15;
+   SS_RESET
    WIZCHIP_CRITICAL_EXIT();
 }
 
@@ -162,7 +167,7 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    uint16_t i;
 
    WIZCHIP_CRITICAL_ENTER();
-   GPIOA->BSRRH = GPIO_Pin_15;
+   SS_SET
 
    AddrSel |= (_W5500_SPI_WRITE_ | _W5500_SPI_VDM_OP_);
 
@@ -191,7 +196,7 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    } 
 
    while (SPI1->SR & SPI_I2S_FLAG_BSY);
-   GPIOA->BSRRL = GPIO_Pin_15;
+   SS_RESET
    WIZCHIP_CRITICAL_EXIT();
 }
 
