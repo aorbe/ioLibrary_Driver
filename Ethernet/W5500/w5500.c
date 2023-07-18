@@ -54,15 +54,13 @@
 //#include <stdio.h>
 #include "w5500.h"
 #include "../../inc/stm32f4_discovery.h"
+#include "../../inc/main.h"
 
 #define _W5500_SPI_VDM_OP_          0x00
 #define _W5500_SPI_FDM_OP_LEN1_     0x01
 #define _W5500_SPI_FDM_OP_LEN2_     0x02
 #define _W5500_SPI_FDM_OP_LEN4_     0x03
 
-
-#define SS_RESET GPIOC->BSRRL = GPIO_Pin_5;
-#define SS_SET GPIOC->BSRRH = GPIO_Pin_5;
 
 #if   (_WIZCHIP_ == 5500)
 ////////////////////////////////////////////////////
@@ -84,15 +82,15 @@ uint8_t  WIZCHIP_READ(uint32_t AddrSel)
    spi_data[2] = (AddrSel & 0x000000FF) >> 0;
    spi_data[3] = 0x00;
    
-   ret = *(volatile uint8_t *)&SPI1->DR;
+   ret = *(volatile uint8_t *)&SPI_ETH->DR;
    for(int x=0; x<4; x++) {
-      while (!(SPI1->SR & SPI_I2S_FLAG_TXE));
-      *(volatile uint8_t *)&SPI1->DR = spi_data[x];
-      while (!(SPI1->SR & SPI_I2S_FLAG_RXNE));
-      ret = *(volatile uint8_t *)&SPI1->DR;
+      while (!(SPI_ETH->SR & SPI_I2S_FLAG_TXE));
+      *(volatile uint8_t *)&SPI_ETH->DR = spi_data[x];
+      while (!(SPI_ETH->SR & SPI_I2S_FLAG_RXNE));
+      ret = *(volatile uint8_t *)&SPI_ETH->DR;
    } 
 
-   while (SPI1->SR & SPI_I2S_FLAG_BSY);
+   while (SPI_ETH->SR & SPI_I2S_FLAG_BSY);
    SS_RESET
    WIZCHIP_CRITICAL_EXIT();
    
@@ -116,11 +114,11 @@ void WIZCHIP_WRITE(uint32_t AddrSel, uint8_t wb )
    spi_data[3] = wb;
 
    for(int x=0; x<4; x++) {
-      while (!(SPI1->SR & SPI_I2S_FLAG_TXE));
-      SPI1->DR = spi_data[x];
+      while (!(SPI_ETH->SR & SPI_I2S_FLAG_TXE));
+      SPI_ETH->DR = spi_data[x];
    } 
 
-   while (SPI1->SR & SPI_I2S_FLAG_BSY);
+   while (SPI_ETH->SR & SPI_I2S_FLAG_BSY);
    SS_RESET
    WIZCHIP_CRITICAL_EXIT();
 }
@@ -141,22 +139,22 @@ void WIZCHIP_READ_BUF (uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    spi_data[1] = (AddrSel & 0x0000FF00) >> 8;
    spi_data[2] = (AddrSel & 0x000000FF) >> 0;
 
-   pBuf[0] = *(volatile uint8_t *)&SPI1->DR;
+   pBuf[0] = *(volatile uint8_t *)&SPI_ETH->DR;
    for(int x=0; x<3; x++) {
-      while (!(SPI1->SR & SPI_I2S_FLAG_TXE));
-      *(volatile uint8_t *)&SPI1->DR = spi_data[x];
-      while (!(SPI1->SR & SPI_I2S_FLAG_RXNE));
-      pBuf[0] = *(volatile uint8_t *)&SPI1->DR;
+      while (!(SPI_ETH->SR & SPI_I2S_FLAG_TXE));
+      *(volatile uint8_t *)&SPI_ETH->DR = spi_data[x];
+      while (!(SPI_ETH->SR & SPI_I2S_FLAG_RXNE));
+      pBuf[0] = *(volatile uint8_t *)&SPI_ETH->DR;
    }
 
    for(i = 0; i < len; i++) {
-      while (!(SPI1->SR & SPI_I2S_FLAG_TXE));
-      *(volatile uint8_t *)&SPI1->DR = 0x00;
-      while (!(SPI1->SR & SPI_I2S_FLAG_RXNE));
-      pBuf[i] = *(volatile uint8_t *)&SPI1->DR;
+      while (!(SPI_ETH->SR & SPI_I2S_FLAG_TXE));
+      *(volatile uint8_t *)&SPI_ETH->DR = 0x00;
+      while (!(SPI_ETH->SR & SPI_I2S_FLAG_RXNE));
+      pBuf[i] = *(volatile uint8_t *)&SPI_ETH->DR;
    }
 
-   while (SPI1->SR & SPI_I2S_FLAG_BSY);
+   while (SPI_ETH->SR & SPI_I2S_FLAG_BSY);
    SS_RESET
    WIZCHIP_CRITICAL_EXIT();
 }
@@ -176,11 +174,11 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    spi_data[2] = (AddrSel & 0x000000FF) >> 0;
 
    for(int x=0; x<3; x++) {
-      while (!(SPI1->SR & SPI_I2S_FLAG_TXE));
-      SPI1->DR = spi_data[x];
+      while (!(SPI_ETH->SR & SPI_I2S_FLAG_TXE));
+      SPI_ETH->DR = spi_data[x];
    } 
 
-   // while (!(SPI1->SR & SPI_I2S_FLAG_TXE));
+   // while (!(SPI_ETH->SR & SPI_I2S_FLAG_TXE));
    // DMA2->LISR = DMA_LIFCR_CTCIF3;
    // DMA2_Stream3->M0AR = &pBuf[0];
    // DMA2_Stream3->NDTR = len;
@@ -191,11 +189,11 @@ void WIZCHIP_WRITE_BUF(uint32_t AddrSel, uint8_t* pBuf, uint16_t len)
    // DMA2->HIFCR =  DMA_LIFCR_CTCIF3;
 
    for(int x=0; x<len; x++) {
-      while (!(SPI1->SR & SPI_I2S_FLAG_TXE));
-      SPI1->DR = pBuf[x];
+      while (!(SPI_ETH->SR & SPI_I2S_FLAG_TXE));
+      SPI_ETH->DR = pBuf[x];
    } 
 
-   while (SPI1->SR & SPI_I2S_FLAG_BSY);
+   while (SPI_ETH->SR & SPI_I2S_FLAG_BSY);
    SS_RESET
    WIZCHIP_CRITICAL_EXIT();
 }
